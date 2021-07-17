@@ -5,13 +5,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>Simple Price</title>
+    <title>Simple Pricer</title>
 </head>
 <body>
     <div class="container">
         <header class="title">
             <h1>Simple Pricer</h1>
-            <h3>(by <a href="https://www.etsy.com/shop/WoodluckTR" target="_blank">WoodluckTR ➶</a>)</h3>
+            <h3>(by <a href="https://www.etsy.com/shop/WoodluckTR" target="_blank">WoodluckTR</a>)</h3>
         </header>
         <div class="seperator"></div>
         <section class="iscm">
@@ -26,10 +26,13 @@
             </div>
         </section>
         <div class="prototype">
+            <div class="prototype_human">
+                <img src="Richie_1.png" alt="prototype human">
+            </div>
             <div class="cube">
-                <div class="animate side top"><span class="area_length_value_depth area_length_type">12k depth</span></div>
-                <div class="animate side front"><span class="area_length_value_height area_length_type">12k height</span></div>
-                <div class="animate side left"><span class="area_length_value_width area_length_type">12kwidth</span></div>
+                <div class="animate side top"><span class="area_length_value_depth area_length_type">top </span></div>
+                <div class="animate side front"><span class="area_length_value_height area_length_type">front</span></div>
+                <div class="animate side left"><span class="area_length_value_width area_length_type">left</span></div>
              </div>
         </div>
         <div class="type_select form">
@@ -50,21 +53,21 @@
         <div class="form">
             <label class="label">Depth</label>
             <div>
-                <input type="number" min="0" max="99999" class="dimension" value="76">
+                <input type="number" min="0" max="99999" class="dimension" value="220" data-lengthtype="depth" step="10">
                 <span class="animate assetType">cm</span>
             </div>
         </div>
         <div class="form">
             <label class="label">Width</label>
             <div>
-                <input type="number" min="0" max="99999" class="dimension" value="127">
+                <input type="number" min="0" max="99999" class="dimension" value="76" data-lengthtype="width" step="5">
                 <span class="animate assetType">cm</span>
             </div>
         </div>
         <div class="form">
             <label class="label">Height</label>
             <div>
-                <input type="number" min="0" max="99999" class="dimension dimension-height" disabled value="7">
+                <input type="number" min="0" max="99999" class="dimension dimension-height" value="7" data-lengthtype="height" step="0,5">
                 <span class="animate assetType">cm</span>
             </div>
         </div>
