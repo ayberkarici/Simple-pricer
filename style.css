@@ -146,6 +146,7 @@ input:checked + .slider:before {
     color: #EBF3FB;
     -webkit-box-shadow: 0px 6px 46px 4px rgba(0,0,0,0.45); 
     box-shadow: 0px 6px 46px 4px rgba(0,0,0,0.45);
+    position: relative
 }
 
 .title {
@@ -153,7 +154,7 @@ input:checked + .slider:before {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 32px 0%;
+    padding: 32px 0% 16px;
     flex-direction: column;
 }
 
@@ -170,7 +171,7 @@ input:checked + .slider:before {
 
 .title>h1 {
     font-size: 48px;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
 }
 
 .title>h3 {
@@ -185,7 +186,7 @@ input:checked + .slider:before {
     width: 100%;
     height: 1px;
     background-color: #ebf3fb44;
-    margin: 0% 0% 16px;
+    margin: 16px 0%;
 }
 
 .iscm {
@@ -204,9 +205,9 @@ input:checked + .slider:before {
 
 .prototype {
     width: 100%;
-    height: 130px;
-    margin-top: 50px;
+    height: 200px;
     display: flex;
+
     align-items: center;
     align-self: center;
     align-content: center;
@@ -214,12 +215,13 @@ input:checked + .slider:before {
     justify-items: center;
     justify-tracks: center;
     position: relative;
+    user-select: none;
 }
 
 .prototype_human {
     position: absolute;
-    left: 0;
-    top: -50px;
+    left: 0%;
+    top: 0%;
 }
 
 .prototype_human > img {
@@ -228,7 +230,7 @@ input:checked + .slider:before {
 
 .cube {
     transform-style: preserve-3d;
-    transform: rotateX(240deg) rotateY(0deg) rotateZ(-155deg)  ;
+    transform: rotateX(250deg) rotateY(0deg) rotateZ(-150deg) translateZ(35px);
     -webkit-box-shadow: 0px 6px 46px 1px rgba(0,0,0,0.45); 
     box-shadow: 0px 6px 46px 1px rgba(0,0,0,0.45);
     position: absolute;
@@ -269,7 +271,7 @@ input:checked + .slider:before {
     }
 
   .front {
-    transform: rotateX(90deg) translateX(-161px)/* A */  translateY(-40px) translateZ(-44px)/* B */;
+    transform: rotateX(90deg) translateX(-150px)/* A */  translateY(-56px) translateZ(-68px)/* B */;
     transform-origin: center;
     background: #EBB34B;
     width: 220px; /* A */
@@ -279,7 +281,7 @@ input:checked + .slider:before {
   }
 
   .left {
-    transform: rotateY(90deg) translate3d(51px, -8px, 59px);
+    transform: rotateY(90deg) translate3d(56px, 0px, 62px);
     transform-origin: center;
     background: #EBB34B;
     width: 15px;
