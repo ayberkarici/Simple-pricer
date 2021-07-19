@@ -211,50 +211,38 @@ $(document).ready(function () {
             $(classname).html(value);
         } 
     }
-    
-    dragElement($('.prototype'));
 
-    function dragElement(elmnt) {
-      let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    // Show approximate results
+    // All Heights are 5.5cm
+    $('.showprice').click(function (event) {
+        let depth = new Number($('.dimension')[0].value);
+        let width = new Number($('.dimension')[1].value);
+        let height = new Number($('.dimension')[2].value);
 
-      if (elmnt) {
-        /* if present, the header is where you move the DIV from:*/
-        elmnt.onmousedown = dragMouseDown;
-      } else {
-        /* otherwise, move the DIV from anywhere inside the DIV:*/
-        elmnt.onmousedown = dragMouseDown;
-      }
-    
-      function dragMouseDown(e) {
-        e = e || window.event;
-        e.preventDefault();
-        // get the mouse cursor position at startup:
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        // call a function whenever the cursor moves:
-        document.onmousemove = elementDrag;
-      }
-    
-      function elementDrag(e) {
-        e = e || window.event;
-        e.preventDefault();
-        // calculate the new cursor position:
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        // set the element's new position:
-        $('.cube')[0].style.transform  = "rotateX(" + pos4 + "deg) rotateY(0deg) rotateZ(-150deg) translateZ(35px)";
-        console.log($('.cube')[0].style.transform );
-      }
-    
-      function closeDragElement() {
-        /* stop moving when mouse button is released:*/
-        document.onmouseup = null;
-        document.onmousemove = null;
-      }
-    }
+        if(currentLengthType == "cm") {
+            show_prices(depth, width, height);
+            
+        } else if (currentLengthType == "inch") {
+            depth = Math.round((depth  * (2.54) + Number.EPSILON) * 100) / 100;
+            width = Math.round((width  * (2.54) + Number.EPSILON) * 100) / 100;
+            height = Math.round((height  * (2.54) + Number.EPSILON) * 100) / 100;
+            
+            show_prices(depth, width, height);
+        }
+            
+        function show_prices(depth = Number, width = Number, height = Number) {
+            let result = Array();
+
+            for (let i = 0; i < 5; i++) {
+                for (let e = 0; e < 4; e++) {
+                    let purchase = Math.round(((depth + i*13) / 100 ) * ((width + e*8) / 100) * 13000);
+                    result.push((depth + i*13) + "x" + (width + e*8) + "cm" + " - " +  purchase);
+                }
+            }
+
+            console.log(result);
+        }
+
+    })
 })
-
 
