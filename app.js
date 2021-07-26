@@ -218,6 +218,7 @@ $(document).ready(function () {
         let depth = new Number($('.dimension')[0].value);
         let width = new Number($('.dimension')[1].value);
         let height = new Number($('.dimension')[2].value);
+        let parameter = new Number($('.parameter')[0].value);
 
         if(currentLengthType == "cm") {
             show_prices(depth, width, height);
@@ -232,17 +233,90 @@ $(document).ready(function () {
             
         function show_prices(depth = Number, width = Number, height = Number) {
             let result = Array();
+            $.get( "https://v3.paribu.com/app/markets/usdt-tl", function( data ) {
+                let obj = data.data.orderBook.sell
+                let dollar = Object.keys(obj).map((key) => [Number(key), obj[key]]);
+                let newPurchase, purchase, inchDepth, inchWidth, currentwidth, currentdepth= 0;
+                
 
-            for (let i = 0; i < 5; i++) {
-                for (let e = 0; e < 4; e++) {
-                    let purchase = Math.round(((depth + i*13) / 100 ) * ((width + e*8) / 100) * 13000);
-                    result.push((depth + i*13) + "x" + (width + e*8) + "cm" + " - " +  purchase);
+
+                console.log(dollar[0][0]);
+                let currentDollar = dollar[0][0];
+
+                for (let i = 0; i < 20; i++) {
+                    if ((depth + i*10) < 110) {
+                        currentwidth = (width + i*10)
+                        currentdepth = (depth + i*15)
+
+                    } else if((depth + i*10) >= 110 && (depth + i*10) < 210) {
+                        currentwidth = (width + i*3)
+                        currentdepth = (depth + i*8)
+
+                    } else {
+                        currentwidth = (width + i*6)
+                        currentdepth = (depth + i*10)
+                    }
+
+                    purchase = Math.round((currentdepth / 100 ) * (currentwidth / 100) * parameter / currentDollar); // Çarpan değişken
+
+                    let lastone = +purchase.toString().split('').pop();
+                    
+                    if (lastone != 0 ) {
+                        let a = purchase.toString().split('');
+                        a[a.length - 1] = "9"; 
+
+                        let b = a.join('');
+                        newPurchase = parseInt(b) + 0.99;
+
+                    } 
+
+                    inchDepth = Math.round(Math.round((currentdepth * 0.393700787 + Number.EPSILON) * 100) / 100);
+                    inchWidth = Math.round(Math.round((currentwidth * 0.393700787 + Number.EPSILON) * 100) / 100);
+                    result.push(currentdepth + "x" + currentwidth + "cm " + inchDepth +'"x' + inchWidth + '"' + " - " +  newPurchase + "/" + (newPurchase + 230));
+
+
+
                 }
-            }
+                
+                writePrices(result);
+            
+            });
 
-            console.log(result);
         }
-
+        
     })
+
+    function writePrices(list) {
+        $('.renderList').html('')
+        let price = "";
+        let result = "";
+        list.forEach(item => {
+            price = item.split(" - ");
+            priceRight = price[1].split("/"); 
+        result += `
+                <li>
+                    <div class="dblclick">${price[0]}</div>
+                    <div><span class="dblclick">${priceRight[0]}</span> / <span class="dblclick">${priceRight[1]}</span> </div>
+                </li>
+                <div class="subseperator"> </div>
+                `
+        });
+
+        $('.renderList').html(result)
+    }
+
+    $(document).on("click", ".dblclick", function(e) {
+        copyToClipboard($(this).text());
+        $(this)[0].style.color = "#EBB34B";
+        
+    });
+
 })
 
+function copyToClipboard(text) {
+    var $temp = $("<input>");
+    $("body").append($temp);
+    $temp.val(text).select();
+    document.execCommand("copy");
+    $temp.remove();
+}

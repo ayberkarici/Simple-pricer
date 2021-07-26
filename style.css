@@ -113,6 +113,7 @@ body {
 
 input:checked + .slider {
     background-color: #EBB34B;
+    
 }
 
 input:focus + .slider {
@@ -135,6 +136,7 @@ input:checked + .slider:before {
 }
 
 .container {
+    margin: 1rem;
     background-color: #131B2B;
     width: 450px;
     height: fit-content;
@@ -502,4 +504,13 @@ box-shadow: 0px 6px 46px 1px rgba(0,0,0,0.45);
     height: 1px;
     background-color: #ebb34b41;
     margin: 8px 0%;
+}
+
+.dblclick {
+    user-select: none;
+    transition: all .2s cubic-bezier(0,.99,.68,1.07);
+}
+
+.dblclick:hover {
+    color: #ebb34bc9;
 }
