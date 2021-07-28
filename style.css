@@ -514,3 +514,25 @@ box-shadow: 0px 6px 46px 1px rgba(0,0,0,0.45);
 .dblclick:hover {
     color: #ebb34bc9;
 }
+
+.countries {
+    width: 100%;
+    padding: 12px;
+    height: fit-content;
+    display: inline-block;
+    border: 1px solid #2A3243;
+    border-radius: 8px;
+    outline: none;
+    box-sizing: border-box;
+    background: #151B29;
+    color: white;
+    transition: .3s border cubic-bezier(0,.99,.68,1.07);
+    -webkit-box-shadow: 0px 6px 46px 1px rgba(0,0,0,0.45); 
+box-shadow: 0px 6px 46px 1px rgba(0,0,0,0.45);
+}
+
+.countries:hover {
+    border: #EBB34B 1px solid;
+}
+
+

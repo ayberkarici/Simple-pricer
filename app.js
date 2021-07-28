@@ -215,10 +215,10 @@ $(document).ready(function () {
     // Show approximate results
     // All Heights are 5.5cm
     $('.showprice').click(function (event) {
-        let depth = new Number($('.dimension')[0].value);
-        let width = new Number($('.dimension')[1].value);
-        let height = new Number($('.dimension')[2].value);
-        let parameter = new Number($('.parameter')[0].value);
+        let depth = new Number($('.dimension')[0].value),
+        width = new Number($('.dimension')[1].value),
+        height = new Number($('.dimension')[2].value),
+        parameter = new Number($('.parameter')[0].value);
 
         if(currentLengthType == "cm") {
             show_prices(depth, width, height);
@@ -236,7 +236,7 @@ $(document).ready(function () {
             $.get( "https://v3.paribu.com/app/markets/usdt-tl", function( data ) {
                 let obj = data.data.orderBook.sell
                 let dollar = Object.keys(obj).map((key) => [Number(key), obj[key]]);
-                let newPurchase, purchase, inchDepth, inchWidth, currentwidth, currentdepth= 0;
+                let roundedPurchase, purchase, inchDepth, inchWidth, currentwidth, currentdepth= 0;
                 
 
 
@@ -266,15 +266,15 @@ $(document).ready(function () {
                         a[a.length - 1] = "9"; 
 
                         let b = a.join('');
-                        newPurchase = parseInt(b) + 0.99;
+                        roundedPurchase = parseInt(b) + 0.99;
 
-                    } 
+                    }  else {
+                        roundedPurchase = purchase + 0.99;
+                    }
 
                     inchDepth = Math.round(Math.round((currentdepth * 0.393700787 + Number.EPSILON) * 100) / 100);
                     inchWidth = Math.round(Math.round((currentwidth * 0.393700787 + Number.EPSILON) * 100) / 100);
-                    result.push(currentdepth + "x" + currentwidth + "cm " + inchDepth +'"x' + inchWidth + '"' + " - " +  newPurchase + "/" + (newPurchase + 230));
-
-
+                    result.push(currentdepth + "x" + currentwidth + "cm " + inchDepth +'"x' + inchWidth + '"' + " - " +  roundedPurchase + "/" + (roundedPurchase + 230));
 
                 }
                 
@@ -287,6 +287,7 @@ $(document).ready(function () {
     })
 
     function writePrices(list) {
+        console.log(list);
         $('.renderList').html('')
         let price = "";
         let result = "";
@@ -294,15 +295,15 @@ $(document).ready(function () {
             price = item.split(" - ");
             priceRight = price[1].split("/"); 
         result += `
-                <li>
-                    <div class="dblclick">${price[0]}</div>
-                    <div><span class="dblclick">${priceRight[0]}</span> / <span class="dblclick">${priceRight[1]}</span> </div>
-                </li>
-                <div class="subseperator"> </div>
-                `
+            <li>
+                <div class="dblclick">${price[0]}</div>
+                <div><span class="dblclick">${priceRight[0]}</span> / <span class="dblclick">${priceRight[1]}</span> </div>
+            </li>
+            <div class="subseperator"> </div>
+            `
         });
-
         $('.renderList').html(result)
+
     }
 
     $(document).on("click", ".dblclick", function(e) {
@@ -311,12 +312,32 @@ $(document).ready(function () {
         
     });
 
+    function copyToClipboard(text) {
+        var $temp = $("<input>");
+        $("body").append($temp);
+        $temp.val(text).select();
+        document.execCommand("copy");
+        $temp.remove();
+    }
+
+    getAllCountries();
+
+    function getAllCountries() {
+        ALL_COUNTRIES = ["1. Bölge","Almanya ","Avusturya ","Belçika ","Fransa ","Hollanda ","İtalya ","Liechtenstein ","Lüksemburg ","Monako ","2. Bölge","Bulgaristan ","İngiltere ","İspanya ","İsviçre ","İrlanda Cumhuriyeti ","Portekiz ","San Marino ","3. Bölge","Danimarka ","Yunanistan ","Polonya ","Slovenya ","İsveç ","Norveç ","Finlandiya ","Slovak Cumhuriyeti ","Andorra ","Macaristan ","Romanya ","Arnavutluk ","Cebelitarık ","Estonya ","Letonya ","Litvanya ","Malta ","4. Bölge","Amerika Birleşik Devletleri ","Kanada ","5. Bölge","Belarus ","Bosna Hersek ","Hırvatistan ","Makedonya (FYROM) ","Moldova ","Ukrayna ","Çek Cumhuriyeti ","Meksika ","Bahreyn ","Birleşik Arap Emirlikleri ","Faroe Adaları ","İsrail ","İzlanda ","Karadağ ","Katar ","Lübnan ","6. Bölge","Mısır ","Umman ","Ürdün ","Afganistan ","Azerbaycan ","Cezayir ","Endonezya ","Ermenistan ","Fas ","Filipinler ","Gürcistan ","Hindistan ","Hong Kong ","Irak ","Japonya ","Kazakistan ","Kırgızistan ","Kore. Güney ","Kuveyt ","Libya ","Malezya ","Özbekistan ","Porto Riko ","Rusya ","Singapur ","Suudi Arabistan ","Tacikistan ","Tayland ","Tayvan ","Tunus ","Vietnam ","Yemen Cumhuriyeti ","7. Bölge","Anguilla ","Antigua ","Arjantin ","Aruba ","Avustralya ","Bahama ","Bangaldeş ","Barbados ","Belize ","Bermuda ","hutan ","Bolivya ","Bonaire ","Brezilya ","Brunei ","Cayman Adaları ","Curaçao ","Ekvator ","El Salvador ","Fiji Adası ","Fransız Guyanası ","Grenada ","Grönland ","Guadelup ","Guatemala ","Guyana ","Haiti ","Honduras ","İngiliz Virgin Adaları ","Jamaika ","Kosta Rika ","Laos ","Macau ","Maldiv Adaları ","Martinik ","Moğolistan ","Montserrat ","Myanmar ","Nepal ","Nevis (St. Kitts) ","Nikaragua ","Pakistan ","Panama ","Paraguay ","Sri Lanka ","St. Luçia ","St. Maarten ","St. Vincent ve Grenadines ","Surinam ","Şili ","Trinidad ve Tobago ","Turks ve Caicos Adaları ","Uruguay ","Venezuela ","Virgin Adaları ABD ","Yeni Zelanda ","8. Bölge","Nijerya ","Kenya ","Çin Halk Cumhuriyeti ","Kolombiya ","Dominik Cumhuriyeti ","Peru ","Güney Afrika ","Amerikan Samoa ","Angola ","Benin ","Botswana ","Burkina Faso ","Burundi ","Cape Verde Adaları ","Cibuti ","Çad ","Eritre ","Fildişi Sahili ","Fransız Polinezyası ","Gabon ","Gambiya ","Gana ","Gine ","Guam ","Kamerun ","Kongo ","Kongo Halk Cumhuriyeti ","Kuk Adası ","Kuzey Mariana Adaları ","Lesotho ","Liberya ","Madagaskar ","Malavi ","Mali ","Marshall Adaları ","Mikronezya (Federal Devletleri) ","Moritanya ","Namibya ","Nijer ","Orta Afrika Cumhuriyeti ","Palau ","Papua Yeni Gine ","Reunion ","Ruanda ","Samoa ","Senegal ","Seyşel Adaları ","Swaziland ","Togo ","Tonga ","Vanuatu ","Wallis ve Futuna Adaları ","Yeni Kaledonya ","Zambiya ","imbabve ","9. Bölge","Kamboçya ","Doğu Timur ","Ekvator Ginesi ","Etiyopya ","Gine Bissau ,","Guernsey ","Jersey ","Kiribati ","Komor ","Mauritius ","Mayotte ","Mozambik ","Sierra Leone ","Solomon Adaları ","Tanzanya ","Tuvalu ","Türkmenistan ","Uganda "]
+
+        ALL_COUNTRIES.forEach(item => {
+            $('#countries').append(`<option value="${item}" ${isDisabled(item)}>${item}</option>`);
+        })
+
+    }
+
+    function isDisabled(item) {
+        if(item == "1. Bölge" || item == "2. Bölge" || item == "3. Bölge" || item == "4. Bölge" || item == "5. Bölge" || item == "6. Bölge" || item == "7. Bölge" || item == "8. Bölge" || item == "9. Bölge") {
+            return "disabled";
+        } else {
+            return true;
+        }
+    }
+    
 })
 
-function copyToClipboard(text) {
-    var $temp = $("<input>");
-    $("body").append($temp);
-    $temp.val(text).select();
-    document.execCommand("copy");
-    $temp.remove();
-}
