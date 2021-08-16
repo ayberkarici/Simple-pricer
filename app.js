@@ -1,6 +1,18 @@
+(jQuery.fn.center = function () {
+    this.css("position","absolute");
+    this.css("top", Math.max(0, (($(window).height() - $(this).outerHeight()) / 2) + 
+        $(window).scrollTop()) + "px");
+    this.css("left", Math.max(0, (($(window).width() - $(this).outerWidth()) / 2) + 
+        $(window).scrollLeft()) + "px");
+    return this;
+})
+
 $(document).ready(function () {
+    getAllCountries();
+    
     let cminch = true; 
     let currentLengthType = "cm";
+
     $('.lengthType').on('change', function () {
         if(cminch) {
             // Selected INCH
@@ -54,8 +66,12 @@ $(document).ready(function () {
         }
     })
 
+    set_seat_number(currentLengthType);
+
     $('.dimension').on('keyup', function () {
         set_table(currentLengthType);
+
+        set_seat_number(currentLengthType);
     })
     
     $('.dimension').on('change', function () {
@@ -77,7 +93,7 @@ $(document).ready(function () {
 
                         set_depth(inputValue);
                     } else if (elem.dataset.lengthtype == "width") {
-                        $('.dimension')[i].attributes.min.value = 66;
+                        $('.dimension')[i].attributes.min.value = 20;
                         $('.dimension')[i].attributes.max.value = 130;
                         $('.dimension')[i].attributes.step.value = 2;
 
@@ -101,7 +117,7 @@ $(document).ready(function () {
 
                         set_depth(resultInch);
                     } else if (elem.dataset.lengthtype == "width") {
-                        $('.dimension')[i].attributes.min.value = 25.98;
+                        $('.dimension')[i].attributes.min.value = 7.87;
                         $('.dimension')[i].attributes.max.value = 51.18;
                         $('.dimension')[i].attributes.step.value = 2;
 
@@ -200,6 +216,8 @@ $(document).ready(function () {
 
             write_length('.area_length_value_width', value);
         }
+
+
     }
 
     function write_length(classname, value) {
@@ -212,13 +230,21 @@ $(document).ready(function () {
         } 
     }
 
+    $('.turnback').click(function () {
+        location.reload()
+    })
+
     // Show approximate results
     // All Heights are 5.5cm
     $('.showprice').click(function (event) {
-        let depth = new Number($('.dimension')[0].value),
-        width = new Number($('.dimension')[1].value),
-        height = new Number($('.dimension')[2].value),
-        parameter = new Number($('.parameter')[0].value);
+        $('.measures').css('transform', 'translateY(-30px)').fadeOut();
+        $('.prices').fadeIn();
+        let depth = positive(new Number($('.dimension')[0].value)),
+        width = positive(new Number($('.dimension')[1].value)),
+        height = positive(new Number($('.dimension')[2].value)),
+        parameter = positive(new Number($('.parameter')[0].value));
+        kilogram = positive(new Number($('.kilogram')[0].value)),
+        country = positive($('#countries')[0].value);
 
         if(currentLengthType == "cm") {
             show_prices(depth, width, height);
@@ -257,7 +283,7 @@ $(document).ready(function () {
                         currentdepth = (depth + i*10)
                     }
 
-                    purchase = Math.round((currentdepth / 100 ) * (currentwidth / 100) * parameter / currentDollar); // Çarpan değişken
+                    purchase = Math.round((currentdepth / 100 ) * (currentwidth / 100) * parameter / currentDollar); 
 
                     let lastone = +purchase.toString().split('').pop();
                     
@@ -269,13 +295,17 @@ $(document).ready(function () {
                         roundedPurchase = parseInt(b) + 0.99;
 
                     }  else {
-                        roundedPurchase = purchase + 0.99;
+                        roundedPurchase = purchase - 1 + 0.99;
                     }
 
                     inchDepth = Math.round(Math.round((currentdepth * 0.393700787 + Number.EPSILON) * 100) / 100);
                     inchWidth = Math.round(Math.round((currentwidth * 0.393700787 + Number.EPSILON) * 100) / 100);
-                    result.push(currentdepth + "x" + currentwidth + "cm " + inchDepth +'"x' + inchWidth + '"' + " - " +  roundedPurchase + "/" + (roundedPurchase + 230));
+                    let shipping = roundedPurchase + approxShippingCost(country, currentdepth, currentwidth, kilogram, height) + 100 /**Kargo değişkeni */;
+                    if (isNaN(shipping)) {
+                        shipping = "++Shipping"
+                    }
 
+                    result.push(currentdepth + "x" + currentwidth + "cm " + inchDepth +'"x' + inchWidth + '"' + " - " +  roundedPurchase + "/" +  shipping);
                 }
                 
                 writePrices(result);
@@ -287,7 +317,7 @@ $(document).ready(function () {
     })
 
     function writePrices(list) {
-        console.log(list);
+        
         $('.renderList').html('')
         let price = "";
         let result = "";
@@ -296,8 +326,8 @@ $(document).ready(function () {
             priceRight = price[1].split("/"); 
         result += `
             <li>
-                <div class="dblclick">${price[0]}</div>
-                <div><span class="dblclick">${priceRight[0]}</span> / <span class="dblclick">${priceRight[1]}</span> </div>
+                <div><span class="dblclick">${price[0]}</span> <span>inch</span></div>
+                <div><span class="dblclick">${priceRight[0]}</span> / <span class="dblclick">${priceRight[1]}</span> <span>$</span></div>
             </li>
             <div class="subseperator"> </div>
             `
@@ -313,31 +343,192 @@ $(document).ready(function () {
     });
 
     function copyToClipboard(text) {
+        
         var $temp = $("<input>");
         $("body").append($temp);
         $temp.val(text).select();
         document.execCommand("copy");
         $temp.remove();
-    }
+        
+        console.log(text + " Copied!");
 
-    getAllCountries();
+        let alert = $("<div class='alert' />");
+        alert.html(text + " Copied✓");
+        alert.appendTo("body");
+        
+
+        
+        alert.fadeOut(1500);
+
+        setTimeout(() => {
+            alert.remove();
+        }, 1500);
+
+        
+
+    }
 
     function getAllCountries() {
-        ALL_COUNTRIES = ["1. Bölge","Almanya ","Avusturya ","Belçika ","Fransa ","Hollanda ","İtalya ","Liechtenstein ","Lüksemburg ","Monako ","2. Bölge","Bulgaristan ","İngiltere ","İspanya ","İsviçre ","İrlanda Cumhuriyeti ","Portekiz ","San Marino ","3. Bölge","Danimarka ","Yunanistan ","Polonya ","Slovenya ","İsveç ","Norveç ","Finlandiya ","Slovak Cumhuriyeti ","Andorra ","Macaristan ","Romanya ","Arnavutluk ","Cebelitarık ","Estonya ","Letonya ","Litvanya ","Malta ","4. Bölge","Amerika Birleşik Devletleri ","Kanada ","5. Bölge","Belarus ","Bosna Hersek ","Hırvatistan ","Makedonya (FYROM) ","Moldova ","Ukrayna ","Çek Cumhuriyeti ","Meksika ","Bahreyn ","Birleşik Arap Emirlikleri ","Faroe Adaları ","İsrail ","İzlanda ","Karadağ ","Katar ","Lübnan ","6. Bölge","Mısır ","Umman ","Ürdün ","Afganistan ","Azerbaycan ","Cezayir ","Endonezya ","Ermenistan ","Fas ","Filipinler ","Gürcistan ","Hindistan ","Hong Kong ","Irak ","Japonya ","Kazakistan ","Kırgızistan ","Kore. Güney ","Kuveyt ","Libya ","Malezya ","Özbekistan ","Porto Riko ","Rusya ","Singapur ","Suudi Arabistan ","Tacikistan ","Tayland ","Tayvan ","Tunus ","Vietnam ","Yemen Cumhuriyeti ","7. Bölge","Anguilla ","Antigua ","Arjantin ","Aruba ","Avustralya ","Bahama ","Bangaldeş ","Barbados ","Belize ","Bermuda ","hutan ","Bolivya ","Bonaire ","Brezilya ","Brunei ","Cayman Adaları ","Curaçao ","Ekvator ","El Salvador ","Fiji Adası ","Fransız Guyanası ","Grenada ","Grönland ","Guadelup ","Guatemala ","Guyana ","Haiti ","Honduras ","İngiliz Virgin Adaları ","Jamaika ","Kosta Rika ","Laos ","Macau ","Maldiv Adaları ","Martinik ","Moğolistan ","Montserrat ","Myanmar ","Nepal ","Nevis (St. Kitts) ","Nikaragua ","Pakistan ","Panama ","Paraguay ","Sri Lanka ","St. Luçia ","St. Maarten ","St. Vincent ve Grenadines ","Surinam ","Şili ","Trinidad ve Tobago ","Turks ve Caicos Adaları ","Uruguay ","Venezuela ","Virgin Adaları ABD ","Yeni Zelanda ","8. Bölge","Nijerya ","Kenya ","Çin Halk Cumhuriyeti ","Kolombiya ","Dominik Cumhuriyeti ","Peru ","Güney Afrika ","Amerikan Samoa ","Angola ","Benin ","Botswana ","Burkina Faso ","Burundi ","Cape Verde Adaları ","Cibuti ","Çad ","Eritre ","Fildişi Sahili ","Fransız Polinezyası ","Gabon ","Gambiya ","Gana ","Gine ","Guam ","Kamerun ","Kongo ","Kongo Halk Cumhuriyeti ","Kuk Adası ","Kuzey Mariana Adaları ","Lesotho ","Liberya ","Madagaskar ","Malavi ","Mali ","Marshall Adaları ","Mikronezya (Federal Devletleri) ","Moritanya ","Namibya ","Nijer ","Orta Afrika Cumhuriyeti ","Palau ","Papua Yeni Gine ","Reunion ","Ruanda ","Samoa ","Senegal ","Seyşel Adaları ","Swaziland ","Togo ","Tonga ","Vanuatu ","Wallis ve Futuna Adaları ","Yeni Kaledonya ","Zambiya ","imbabve ","9. Bölge","Kamboçya ","Doğu Timur ","Ekvator Ginesi ","Etiyopya ","Gine Bissau ,","Guernsey ","Jersey ","Kiribati ","Komor ","Mauritius ","Mayotte ","Mozambik ","Sierra Leone ","Solomon Adaları ","Tanzanya ","Tuvalu ","Türkmenistan ","Uganda "]
+        ALL_COUNTRIES = {"1. Bölge" : 0,"Almanya " : 1,"Avusturya " : 1,"Belçika " : 1,"Fransa " : 1,"Hollanda " : 1,"İtalya " : 1,"Liechtenstein " : 1,"Lüksemburg " : 1,"Monako " : 1,"2. Bölge" : 0,"Bulgaristan " : 2,"İngiltere " : 2,"İspanya " : 2,"İsviçre " : 2,"İrlanda Cumhuriyeti " : 2,"Portekiz " : 2,"San Marino " : 2,"3. Bölge" : 0,"Danimarka " : 3,"Yunanistan " : 3,"Polonya " : 3,"Slovenya " : 3,"İsveç " : 3,"Norveç " : 3,"Finlandiya " : 3,"Slovak Cumhuriyeti " : 3,"Andorra " : 3,"Macaristan " : 3,"Romanya " : 3,"Arnavutluk " : 3,"Cebelitarık " : 3,"Estonya " : 3,"Letonya " : 3,"Litvanya " : 3,"Malta " : 3,"4. Bölge" : 0,"Amerika Birleşik Devletleri " : 4,"Kanada " : 4,"5. Bölge" : 0,"Belarus " : 5,"Bosna Hersek " : 5,"Hırvatistan " : 5,"Makedonya (FYROM) " : 5,"Moldova " : 5,"Ukrayna " : 5,"Çek Cumhuriyeti " : 5,"Meksika " : 5,"Bahreyn " : 5,"Birleşik Arap Emirlikleri " : 5,"Faroe Adaları " : 5,"İsrail " : 5,"İzlanda " : 5,"Karadağ " : 5,"Katar " : 5,"Lübnan " : 5,"6. Bölge": 0,"Mısır " : 6,"Umman " : 6,"Ürdün " : 6,"Afganistan " : 6,"Azerbaycan " : 6,"Cezayir " : 6,"Endonezya " : 6,"Ermenistan " : 6,"Fas " : 6,"Filipinler " : 6,"Gürcistan " : 6,"Hindistan " : 6,"Hong Kong " : 6,"Irak " : 6,"Japonya " : 6,"Kazakistan " : 6,"Kırgızistan " : 6,"Kore. Güney " : 6,"Kuveyt " : 6,"Libya " : 6,"Malezya " : 6,"Özbekistan " : 6,"Porto Riko " : 6,"Rusya " : 6,"Singapur " : 6,"Suudi Arabistan " : 6,"Tacikistan " : 6,"Tayland " : 6,"Tayvan " : 6,"Tunus " : 6,"Vietnam " : 6,"Yemen Cumhuriyeti " : 6,"7. Bölge" : 0,"Anguilla " : 7,"Antigua " : 7,"Arjantin " : 7,"Aruba " : 7,"Avustralya " : 7,"Bahama " : 7,"Bangaldeş " : 7,"Barbados " : 7,"Belize " : 7,"Bermuda " : 7,"hutan " : 7,"Bolivya " : 7,"Bonaire " : 7,"Brezilya " : 7,"Brunei " : 7,"Cayman Adaları " : 7,"Curaçao " : 7,"Ekvator " : 7,"El Salvador " : 7,"Fiji Adası " : 7,"Fransız Guyanası " : 7,"Grenada " : 7,"Grönland " : 7,"Guadelup " : 7,"Guatemala " : 7,"Guyana " : 7,"Haiti " : 7,"Honduras " : 7,"İngiliz Virgin Adaları " : 7,"Jamaika " : 7,"Kosta Rika " : 7,"Laos " : 7,"Macau " : 7,"Maldiv Adaları " : 7,"Martinik " : 7,"Moğolistan " : 7,"Montserrat " : 7,"Myanmar " : 7,"Nepal " : 7,"Nevis (St. Kitts) " : 7,"Nikaragua " : 7,"Pakistan " : 7,"Panama " : 7,"Paraguay " : 7,"Sri Lanka " : 7,"St. Luçia " : 7,"St. Maarten " : 7,"St. Vincent ve Grenadines " : 7,"Surinam " : 7,"Şili " : 7,"Trinidad ve Tobago " : 7,"Turks ve Caicos Adaları " : 7,"Uruguay " : 7,"Venezuela " : 7,"Virgin Adaları ABD " : 7,"Yeni Zelanda " : 7,"8. Bölge" : 0,"Nijerya " : 8,"Kenya " : 8,"Çin Halk Cumhuriyeti " : 8,"Kolombiya " : 8,"Dominik Cumhuriyeti " : 8,"Peru " : 8,"Güney Afrika " : 8,"Amerikan Samoa " : 8,"Angola " : 8,"Benin " : 8,"Botswana " : 8,"Burkina Faso " : 8,"Burundi " : 8,"Cape Verde Adaları " : 8,"Cibuti " : 8,"Çad " : 8,"Eritre " : 8,"Fildişi Sahili " : 8,"Fransız Polinezyası " : 8,"Gabon " : 8,"Gambiya " : 8,"Gana " : 8,"Gine " : 8,"Guam " : 8,"Kamerun " : 8,"Kongo " : 8,"Kongo Halk Cumhuriyeti " : 8,"Kuk Adası " : 8,"Kuzey Mariana Adaları " : 8,"Lesotho " : 8,"Liberya " : 8,"Madagaskar " : 8,"Malavi " : 8,"Mali " : 8,"Marshall Adaları " : 8,"Mikronezya (Federal Devletleri) " : 8,"Moritanya " : 8,"Namibya " : 8,"Nijer " : 8,"Orta Afrika Cumhuriyeti " : 8,"Palau " : 8,"Papua Yeni Gine " : 8,"Reunion " : 8,"Ruanda " : 8,"Samoa " : 8,"Senegal " : 8,"Seyşel Adaları " : 8,"Swaziland " : 8,"Togo " : 8,"Tonga " : 8,"Vanuatu " : 8,"Wallis ve Futuna Adaları " : 8,"Yeni Kaledonya " : 8,"Zambiya " : 8,"imbabve " : 8,"9. Bölge" : 0,"Kamboçya " : 9,"Doğu Timur " : 9,"Ekvator Ginesi " : 9,"Etiyopya " : 9,"Gine Bissau ," : 9,"Guernsey " : 9,"Jersey " : 9,"Kiribati " : 9,"Komor " : 9,"Mauritius " : 9,"Mayotte " : 9,"Mozambik " : 9,"Sierra Leone " : 9,"Solomon Adaları " : 9,"Tanzanya " : 9,"Tuvalu " : 9,"Türkmenistan " : 9,"Uganda " : 9}
 
-        ALL_COUNTRIES.forEach(item => {
-            $('#countries').append(`<option value="${item}" ${isDisabled(item)}>${item}</option>`);
-        })
-
-    }
-
-    function isDisabled(item) {
-        if(item == "1. Bölge" || item == "2. Bölge" || item == "3. Bölge" || item == "4. Bölge" || item == "5. Bölge" || item == "6. Bölge" || item == "7. Bölge" || item == "8. Bölge" || item == "9. Bölge") {
-            return "disabled";
-        } else {
-            return true;
+        for (var key in ALL_COUNTRIES) {
+            $('#countries').append(`<option value="${ALL_COUNTRIES[key]}" ${isDisabledorCanada(ALL_COUNTRIES[key], key)}>${key}</option>`);
         }
     }
-    
-})
 
+    function isDisabledorCanada(item, canada) {
+        if(item == 0) {
+            return "disabled";
+        } else {
+            if (canada == "Kanada ") {
+                return "selected"
+            }
+        }
+    }
+
+    function positive(item) {
+        if(item < 0) {
+            return -1 * item    
+        } else {
+            return item
+        }
+    }
+
+    const kilogramList = ["0.50","1.00","1.50","2.00","2.50","3.00","3.50","4.00","4.50","5.00","5.50","6.00","6.50","7.00","7.50","8.00","8.50","9.00","9.50","10.00","11.00","12.00","13.00","14.00","15.00","16.00","17.00","18.00","19.00","20.00","21.00","22.00","23.00","24.00","25.00","26.00","27.00","28.00","29.00","30.00","31.00","32.00","33.00","34.00","35.00","36.00","37.00","38.00","39.00","40.00","41.00","42.00","43.00","44.00","45.00","46.00","47.00","48.00","49.00","50.00","51.00","52.00","53.00","54.00","55.00","56.00","57.00","58.00","59.00","60.00","61.00","62.00","63.00","64.00","65.00","66.00","67.00","68.00","69.00","70.00"];
+    const firstPriceList = ["7.90","9.69","11.77","15.96","18.39","23.62","26.81","29.56","32.30","35.21","37.51","40.11","42.78","45.59","48.39","50.38","52.70","54.96","57.23","59.43","64.83","67.39","69.95","74.48","77.59","80.55","83.53","89.87","92.32","94.63","99.12","101.49","103.87","106.24","107.58","108.89","110.22","111.54","112.94","113.78","104.78","108.16","111.54","114.92","118.30","135.20","135.20","135.20","135.20","135.20","152.10","152.10","152.10","152.10","152.10","169.00","169.00","169.00","169.00","169.00","185.90","185.90","185.90","185.90","185.90","202.80","202.80","202.80","202.80","202.80","219.70","219.70","219.70","219.70","219.70","236.60","236.60","236.60","236.60","236.60"]
+    const secondPriceList = ["8.60","11.80","14.30","18.60","21.47","25.27","28.50","31.87","34.47","37.17","39.46","41.73","44.43","47.35","50.26","52.32","54.73","57.08","59.43","61.71","67.32","69.98","72.64","77.33","80.56","83.64","86.72","89.87","92.32","94.63","99.12","101.49","103.87","106.24","107.58","108.89","110.22","111.54","115.19","117.92","103.04","107.54","117.79","123.68","129.56","135.51","135.51","135.51","137.73","145.07","152.48","152.48","152.48","154.63","161.97","169.38","169.38","169.38","171.59","178.93","186.34","186.34","186.34","188.49","195.83","203.24","203.24","203.24","205.39","212.80","220.14","220.14","220.14","222.35","229.76","237.16","237.16","237.16","237.16","237.16"];
+    const thirdPriceList = ["8.90","11.80","14.30","19.21","22.36","29.12","32.74","38.89","41.71","42.59","51.40","55.16","59.05","63.01","66.38","68.95","71.63","74.23","76.73","79.33","82.86","86.37","89.87","93.48","96.98","100.50","104.01","107.23","108.27","114.54","118.81","123.23","127.51","131.15","135.29","137.43","138.04","138.67","139.35","139.84","124.88","129.44","133.93","138.43","142.92","147.48","147.48","147.48","147.48","147.48","152.48","157.54","160.52","163.49","166.40","169.38","169.38","169.38","174.69","187.92","201.28","207.67","210.64","213.62","216.53","219.51","219.51","219.51","223.05","230.39","237.80","237.80","237.80","241.28","248.68","256.09","256.09","256.09","256.09","256.09"];
+    const fourthPriceList = ["9.90","11.80","13.70","17.50","19.90","23.90","29.36","31.82","34.28","39.81","40.42","42.27","44.10","45.94","47.79","49.61","51.45","53.31","55.15","56.98","62.75","66.45","70.17","73.87","77.58","81.31","85.01","88.72","92.42","96.12","105.58","108.23","111.08","113.80","116.65","119.50","122.35","123.17","123.93","124.75","120.90","124.80","128.70","132.60","136.50","140.40","144.30","148.20","152.10","156.00","159.90","163.80","167.70","171.60","175.50","179.40","183.30","187.20","191.10","195.00","198.90","202.80","206.70","210.60","214.50","218.40","222.30","226.20","230.10","234.00","237.90","241.80","245.70","249.60","253.50","257.40","261.30","265.20","269.10","273.00"];
+    const fivethPriceList = ["13.17","17.31","19.82","22.32","24.83","27.32","29.82","32.31","34.81","37.41","39.90","42.38","44.91","47.40","49.91","52.39","54.89","57.39","59.88","62.38","65.62","68.84","72.08","75.31","78.55","81.77","85.01","88.25","91.47","94.72","97.95","101.17","104.42","107.64","110.87","114.12","117.34","120.58","123.82","127.04","173.60","179.20","184.80","190.40","196.00","201.60","207.20","212.80","218.40","224.00","229.60","235.20","240.80","246.40","252.00","257.60","263.20","268.80","274.40","280.00","285.60","291.20","296.80","302.40","308.00","313.60","319.20","324.80","330.40","336.00","341.60","347.20","352.80","358.40","364.00","369.60","375.20","380.80","386.40","392.00"]
+    const sixthPriceList = ["14.77","20.18","23.59","28.07","31.36","36.09","40.83","45.56","50.29","58.62","60.78","64.09","71.29","75.06","78.80","82.56","86.31","90.07","93.82","97.58","101.21","105.09","108.83","112.59","116.34","120.10","123.85","127.61","131.35","135.12","138.86","142.62","146.37","150.13","153.88","157.64","161.38","165.15","168.89","172.65","190.96","197.12","203.28","209.44","215.60","221.76","227.92","234.08","240.24","246.40","252.56","258.72","264.88","271.04","277.20","283.36","289.52","295.68","301.84","308.00","314.16","320.32","326.48","332.64","338.80","344.96","351.12","357.28","363.44","369.60","375.76","381.92","388.08","394.24","400.40","406.56","412.72","418.88","425.04","431.20"];
+    const seventhPriceList = ["15.00","20.18","23.59","28.07","31.36","36.09","40.83","45.56","50.29","55.12","57.28","60.59","67.79","71.56","75.30","79.06","82.07","84.53","87.06","89.52","91.98","94.51","96.97","99.43","100.19","102.79","104.48","105.33","106.17","116.08","130.05","134.55","138.21","141.94","145.59","147.28","148.96","150.58","152.19","153.88","190.96","197.12","203.28","209.44","215.60","221.76","227.92","234.08","240.24","246.40","252.56","258.72","264.88","271.04","277.20","283.36","289.52","295.68","301.84","308.00","314.16","320.32","326.48","332.64","338.80","344.96","351.12","357.28","363.44","369.60","375.76","381.92","388.08","394.24","400.40","406.56","412.72","418.88","425.04","431.20"];
+    const eighthPriceList = ["15.40","22.20","26.20","29.05","32.34","51.97","58.65","65.32","70.38","75.53","77.29","80.03","82.84","85.73","92.04","98.44","104.77","111.17","117.49","123.80","140.95","147.84","154.80","161.61","168.50","170.04","171.86","174.69","195.06","211.77","142.74","150.66","158.56","166.47","174.39","182.28","190.19","198.11","206.00","213.91","229.40","236.80","244.20","251.60","259.00","266.40","273.80","281.20","288.60","296.00","303.40","310.80","318.20","325.60","333.00","340.40","347.80","355.20","362.60","370.00","377.40","384.80","392.20","399.60","407.00","414.40","421.80","429.20","436.60","444.00","451.40","458.80","466.20","473.60","481.00","488.40","495.80","503.20","510.60","518.00"];
+    const ninethPriceList = ["18.25","24.15","31.81","39.11","41.86","51.97","58.65","65.32","70.38","75.53","77.29","80.03","82.84","85.73","92.04","98.44","104.77","111.17","117.49","123.80","140.95","147.84","154.80","161.61","168.50","170.04","171.86","174.69","195.06","211.77","142.74","150.66","158.56","166.47","174.39","182.28","190.19","198.11","206.00","213.91","229.40","236.80","244.20","251.60","259.00","266.40","273.80","281.20","288.60","296.00","303.40","310.80","318.20","325.60","333.00","340.40","347.80","355.20","362.60","370.00","377.40","384.80","392.20","399.60","407.00","414.40","421.80","429.20","436.60","444.00","451.40","458.80","466.20","473.60","481.00","488.40","495.80","503.20","510.60","518.00"];
+
+    let counter = 0; 
+    function approxShippingCost(country, depth, width, kilogram, height) {
+        let mainPriceList = [];
+        
+        
+        switch (parseInt(country)) {
+            case 1:
+                mainPriceList = firstPriceList;
+                break;
+            case 2:
+                mainPriceList = secondPriceList;
+                break;
+            case 3:
+                mainPriceList = thirdPriceList;
+                break;
+            case 4:
+                mainPriceList = fourthPriceList;
+                break;
+            case 5:
+                mainPriceList = fivethPriceList;
+                break;
+            case 6:
+                mainPriceList = sixthPriceList;
+                break;
+            case 7:
+                mainPriceList = seventhPriceList;
+                break;
+            case 8:
+                mainPriceList = eighthPriceList;
+                break;
+            case 9:
+                mainPriceList = ninethPriceList;
+                break;
+        
+            default:
+                mainPriceList = false;
+                break;
+        }
+        let desi = (depth) * (width) * (height) / 5000;
+        
+        if (kilogram > desi) {
+            currentKilogram = parseInt(kilogram);
+        } else {
+            currentKilogram = parseInt(desi);
+        }
+
+        if (mainPriceList) {
+            for (let a = 0; a < kilogramList.length; a++) {
+                if (currentKilogram > kilogramList[a - 1] && currentKilogram <= kilogramList[a]) {
+                    let basePrice = parseInt(mainPriceList[a]) + counter;
+                    counter += 5;
+
+                    let weight = (depth / 100) * (width / 100) * (height / 100) * 600;
+                    weightPrice = Math.round(Math.round(((weight + Number.EPSILON) * 100 / 100)));
+                    
+                    return parseInt(basePrice + weightPrice);
+                } 
+            }
+        }
+    }
+
+    function set_seat_number(type) {
+        let kk =  true;
+        let seatNumberDepth = 0;
+        let seatNumberWidth = 0;
+        for (let i = 0; i < $('.dimension').length; i++) {
+            let elem = $('.dimension')[i];
+            let inputValue = Number(elem.value);
+
+            if(type == "cm") {
+                if (elem.dataset.lengthtype == "depth") { // Depth value
+                    if (inputValue < 40) {
+                        kk = 'no seat';
+                    } else {
+                        seatNumberDepth = Math.floor(inputValue / 60) * 2 ; // One person takes 60cm
+                    }
+
+                } else if (elem.dataset.lengthtype == "width") {  // Width value
+                    console.log(inputValue);
+                    if (inputValue >= 120){
+                        seatNumberWidth = Math.floor(inputValue / 60) * 2;
+                    } else if (inputValue >= 50 && inputValue < 120){
+                        seatNumberWidth = 2 ; // If width < 50 depth, cannot afford 2 person at a time
+                    } else if (inputValue >= 30 && inputValue < 50) {
+                        seatNumberWidth = 0;
+                        kk = 'coffee';
+                    } else if (inputValue <= 30 ){
+                        kk = 'no seat';
+                    }
+                }
+            
+            } else if (type == "inch") {
+                inputValue = inputValue * 2.56; 
+
+                if (elem.dataset.lengthtype == "depth") { // Depth value
+                    seatNumberDepth = Math.floor(inputValue / 60) * 2 ; // One person takes 60cm                
+
+                } else if (elem.dataset.lengthtype == "width") {  // Width value
+                    console.log(inputValue);
+                    if (inputValue >= 120){
+                        seatNumberWidth = Math.floor(inputValue / 60) * 2;
+                    } else if (inputValue >= 50 && inputValue < 120){
+                        seatNumberWidth = 2 ; // If width < 50 depth, cannot afford 2 person at a time
+                    } else if (inputValue >= 30 && inputValue < 50) {
+                        seatNumberWidth = 0;
+                        kk = 'coffee';
+                    } else if (inputValue <= 30 ){
+                        kk = 'no seat';
+                    }
+                }
+                
+            }
+        }
+
+
+        if (kk == 'no seat') {
+            $('.seat_number_span').html('Too Short');
+        } else if (kk == 'coffee') {
+            let seatValueDine = seatNumberDepth / 2;
+            let seatValueCoffee = seatNumberDepth + 2;
+            $('.seat_number_span').html('Dine: ' + seatValueDine  + ' or ' + 'Coffee: ' + seatValueCoffee + ' Seats');
+        }else {
+            let seatValue = seatNumberDepth + seatNumberWidth;
+            $('.seat_number_span').html('Dine: ' + seatValue + ' or ' + 'Coffee: ' + seatValue + ' Seats');
+        }
+    }
+})

@@ -8,7 +8,7 @@
     <title>Simple Pricer</title>
 </head>
 <body>
-    <div class="container">
+    <div class="container measures">
         <header class="title">
             <h1>Simple Pricer</h1>
             <h3>(by <a href="https://www.etsy.com/shop/WoodluckTR" target="_blank">WoodluckTR</a>)</h3>
@@ -34,9 +34,12 @@
                 <div class="animate side front"><span class="area_length_value_depth area_length_type">←220cm→</span><span class="area_length_value_height area_length_type">↑ <br> <span class="area_length_value_height_variable">7</span>cm <br> ↓</span></div>
                 <div class="animate side left"><span class="area_length_value_width area_length_type">←76cm→</span></div>
              </div>
+             <div class="seat_number">
+                <span class="seat_number_span"></span>
+             </div>
         </div>
         <div class="type_select form">
-            <label class="label">Product Type</label>
+            <label class="label">Where to</label>
             <select name="countries" id="countries" class="countries">
             </select>
         </div>
@@ -50,39 +53,66 @@
         <div class="form">
             <label class="label">Width</label>
             <div>
-                <input type="number" min="66" max="130" class="dimension" value="76" data-lengthtype="width" step="2">
+                <input type="number" min="20" max="130" class="dimension" value="76" data-lengthtype="width" step="2">
                 <span class="animate assetType">cm</span>
             </div>
         </div>
         <div class="form">
             <label class="label">Height</label>
             <div>
-                <input type="number" min="5" max="17" class="dimension dimension-height" value="5.5" data-lengthtype="height" step="0,5">
+                <input type="number" min="5" max="17" class="dimension dimension-height" value="5.5" data-lengthtype="height" step="0.5">
                 <span class="animate assetType">cm</span>
+            </div>
+        </div>
+        <div class="form">
+            <label class="label">Average Kilogram</label>
+            <div>
+                <input type="number" min="0" class="dimension kilogram" id="kilogram" value="20" data-lengthtype="kilogram" step="0.5">
+                <span class="animate assetType">kg</span>
             </div>
         </div>
         <div class="form">
             <label class="label">Parameter</label>
             <div>
-                <input type="number" value="12000" class="dimension parameter" data-lengthtype=" parameter">
+                <input type="number" value="12000" class="dimension parameter" data-lengthtype=" parameter" step="500">
                 <span class="">₺</span>
             </div>
         </div>
-        <div class="showprice">
+        <div class="main_button showprice">
             Approximate Price →
         </div>
     </div>
-    <div class="container">
+    <div class="container prices">
         <header class="title">
             <h1>Appr Prices</h1>
+            
         </header>
+        <div class="table">
+            <div>
+                <span>Dimensions</span>
+            </div>
+            <div>
+                <span>Without Legs</span> / <span>+Legs</span>  
+            </div>
+        </div>
         <div class="seperator"></div>
         <div class="pricelist">
             <ul class="renderList">
-
+                <li>
+                    <div><span class="dblclick">AAAxYYcm BB"xEE"</span> <span>inch</span></div>
+                    <div><span class="dblclick">RRR</span> / <span class="dblclick">KKK</span> <span>$</span></div>
+                </li>
+                <div class="subseperator"> </div>
+                <li>
+                    <div><span class="dblclick">AAAxYYcm BB"xEE"</span> <span>inch</span></div>
+                    <div><span class="dblclick">RRR</span> / <span class="dblclick">KKK</span> <span>$</span></div>
+                </li>
+                <div class="subseperator"> </div>
             </ul>
         </div>
-
+        <div class="main_button turnback">
+            ← Back
+        </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" ></script>
     <script src="app.js"></script>
